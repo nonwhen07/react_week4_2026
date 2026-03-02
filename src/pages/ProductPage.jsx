@@ -3,13 +3,20 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Modal } from 'bootstrap';
 
+// import Pagination from '../components/Pagination';
+// import ProductModal from '../components/ProductModal';
+import DeleteModal from '../components/DeleteModal';
+
 function ProductPage() {
   // 環境變數
   const baseURL = import.meta.env.VITE_BASE_URL;
   const apiPath = import.meta.env.VITE_API_PATH;
   // Modal Ref 定義
   const productModalRef = useRef(null);
-  const deleteModalRef = useRef(null);
+  // const deleteModalRef = useRef(null);
+  // 管理Modal元件開關
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   // 狀態管理 (State)
   // const [isAuth, setIsAuth] = useState(false);
   const [products, setProducts] = useState([]);
@@ -144,6 +151,7 @@ function ProductPage() {
       await getProducts();
       handleCloseProductModal();
     } catch (error) {
+      console.error(error);
       setModalError(error.response?.data?.message || '操作失敗');
     }
   };
@@ -156,10 +164,10 @@ function ProductPage() {
     try {
       await deleteProduct();
       await getProducts();
-      handleCloseDeleteModal();
+      setIsDeleteModalOpen(false);
     } catch (error) {
       console.error(error);
-      setModalError(error.response?.data?.message || '刪除失敗');
+      setModalError(error.response?.data?.message || '刪除商品失敗');
     }
   };
 
@@ -188,30 +196,27 @@ function ProductPage() {
       // 避免 api 回傳 product 為空物件時，無法正確設定tempProduct更保險
       product && Object.keys(product).length > 0 ? product : defaultModalState,
     );
-    const modal = Modal.getOrCreateInstance(deleteModalRef.current);
-    modal.show();
+    // const modal = Modal.getOrCreateInstance(deleteModalRef.current);
+    // modal.show();
+    // 改由 isDeleteModalOpen 狀態控制 DeleteModal 的開關，並將 tempProduct 傳遞給 DeleteModal 顯示對應的產品資訊
+    setIsDeleteModalOpen(true);
   };
-  const handleCloseDeleteModal = () => {
-    const modal = Modal.getOrCreateInstance(deleteModalRef.current);
-    modal.hide();
-  };
+  // const handleCloseDeleteModal = () => {
+  //   const modal = Modal.getOrCreateInstance(deleteModalRef.current);
+  //   modal.hide();
+  // };
 
   // useEffect getProducts 初始載入產品資料
   useEffect(() => {
-    // const fetchProducts = async () => {
-    //   try {
-    //     await getProducts();
-    //   } catch (error) {
-    //     console.error(error);
-    //     setModalError(error.response?.data?.message || '初始載入產品資料失敗');
-    //   }
-    // };
-    // const getProducts = async () => {
-    //   const res = await axios.get(`${baseURL}/v2/api/${apiPath}/admin/products`);
-    //   setProducts(res.data.products);
-    // };
-
-    getProducts();
+    const fetchProducts = async () => {
+      try {
+        await getProducts();
+      } catch (error) {
+        console.error(error);
+        setModalError(error.response?.data?.message || '初始載入產品資料失敗');
+      }
+    };
+    fetchProducts();
   }, []);
 
   // useEffect(() => {
@@ -328,7 +333,10 @@ function ProductPage() {
                         placeholder="請輸入圖片連結"
                       />
                     </div>
-                    <img src={tempProduct.imageUrl} alt="" className="img-fluid" />
+                    {/* <img src={tempProduct.imageUrl} alt="" className="img-fluid" /> */}
+                    {tempProduct.imageUrl && (
+                      <img src={tempProduct.imageUrl} alt="" className="img-fluid" />
+                    )}
                   </div>
                   {/* 副圖 */}
                   <div className="border border-2 border-dashed rounded-3 p-3">
@@ -512,7 +520,7 @@ function ProductPage() {
         </div>
       </div>
 
-      <div
+      {/* <div
         className="modal fade"
         ref={deleteModalRef}
         id="delProductModal"
@@ -544,7 +552,20 @@ function ProductPage() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
+
+      {/* <DeleteModal
+        tempProduct={tempProduct}
+        getProducts={getProducts}
+        isOpen={isDeleteModalOpen}
+        setIsOpen={setIsDeleteModalOpen}
+      /> */}
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteProduct}
+        productTitle={tempProduct.title}
+      />
     </>
   );
 }

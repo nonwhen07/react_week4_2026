@@ -35,7 +35,6 @@ function LoginPage({ setIsAuth }) {
 
       setIsAuth(true);
     } catch (error) {
-      // alert(error.response?.data?.message || '登入失敗');
       setErrorMessage(error.response?.data?.message || '登入失敗');
     }
   };
