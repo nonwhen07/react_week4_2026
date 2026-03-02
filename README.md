@@ -1,10 +1,12 @@
 # React Admin Dashboard – CRUD + Auth Flow
 
 一個使用 **React + Vite** 製作的後台商品管理系統。  
-本專案重點在於實作完整的 **登入驗證流程 + 商品 CRUD 管理 + Modal 狀態控制**，並針對架構與責任分離進行優化。
+本專案目的是模擬真實後台管理系統的登入驗證與商品管理流程，
+實作完整的 **登入驗證 + 商品 CRUD + Modal 狀態管理**，
+並練習前端專案在架構設計與責任分離上的實作方式。
 
 🔗 Live Demo  
-https://nonwhen07.github.io/react3_2026
+https://nonwhen07.github.io/react_week4_2026
 
 ---
 
@@ -15,6 +17,43 @@ https://nonwhen07.github.io/react3_2026
 - 管理複雜表單狀態與 Modal 控制
 - 優化元件責任分離與資料流設計
 - 練習 GitHub Pages 自動部署流程
+
+---
+
+## 🧰 技術棧
+
+- React 19
+- Vite 7
+- Axios
+- Bootstrap 5
+- Sass
+- ESLint
+- gh-pages
+
+### 📦 核心依賴說明
+
+本專案主要使用以下核心套件：
+
+- axios：API 請求
+- bootstrap：UI 框架
+- react-router-dom：路由管理
+- gh-pages：部署工具
+- sass：樣式預處理器
+
+所有依賴已於 package.json 中定義，請使用 npm install 安裝。
+
+```bash
+npm install
+```
+
+<details> 
+<summary>📌 手動安裝依賴（快速小抄）</summary>
+
+```bash
+npm install axios bootstrap gh-pages prop-types react react-dom react-router-dom sass
+```
+
+</details>
 
 ---
 
@@ -32,6 +71,8 @@ LoginPage → setIsAuth(true)
 App → 根據 isAuth 觸發 getProducts()
 
 避免登入元件直接操作資料，降低耦合。
+此設計可避免未來在導入 Router 或 Context 時產生過度耦合，
+並保留架構擴充彈性。
 
 ---
 
@@ -46,7 +87,8 @@ App → 根據 isAuth 觸發 getProducts()
    - 呼叫 `/v2/api/user/check`
    - 驗證成功後取得商品列表
 
-此設計模擬真實後台管理系統的驗證流程。
+目前使用 Cookie 儲存 Token，
+未來可改為 HttpOnly Cookie 搭配後端驗證以提升安全性。
 
 ---
 
@@ -88,20 +130,18 @@ const formatProductData = (product) => ({
 
 ---
 
-## 🧰 技術棧
-
-- React 19
-- Vite 7
-- Axios
-- Bootstrap 5
-- Sass
-- ESLint
-- gh-pages
-
-### 📦 套件安裝（本專案用到的 dependencies）
+## ⚙ 本地開發
 
 ```bash
-npm i axios bootstrap gh-pages prop-types react react-dom react-router-dom sass
+npm install      # 安裝依賴
+npm run dev      # 開發模式
+npm run build    # 產生 production build
+```
+
+### 預設啟動：
+
+```http
+http://localhost:5173
 ```
 
 ---
@@ -120,21 +160,26 @@ src/
 
 ## 🔐 API 設計
 
+所有 API 請求透過 Axios 進行封裝，
+登入成功後統一設定 Authorization header，
+並透過狀態驅動（state-driven）方式重新抓取資料，
+避免直接在登入元件中操作資料請求。
+
 ### 登入
 
-```bash
+```http
 POST /v2/admin/signin
 ```
 
 ### 驗證
 
-```bash
+```http
 POST /v2/api/user/check
 ```
 
 ### 商品 CRUD
 
-```bash
+```http
 GET    /v2/api/{apiPath}/admin/products
 POST   /v2/api/{apiPath}/admin/product
 PUT    /v2/api/{apiPath}/admin/product/{id}
@@ -153,6 +198,52 @@ npm run deploy
 ```
 
 dist 目錄會推送至 gh-pages 分支。
+並透過 GitHub Pages 進行靜態頁面部署。
+
+---
+
+## 🧩 開發規範與格式化設定
+
+本專案使用 Prettier 統一排版規範，並搭配 VSCode 自動格式化設定。
+此設定確保團隊開發時排版一致，
+並減少 Git diff 因格式差異造成的噪音。
+
+### 📄 .prettierrc
+
+```json
+{
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "useTabs": false,
+  "printWidth": 80,
+  "trailingComma": "es5",
+  "bracketSpacing": true,
+  "arrowParens": "always",
+  "endOfLine": "auto"
+}
+```
+
+### 📄 .vscode/settings.json
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}
+```
 
 ---
 
