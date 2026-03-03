@@ -44,8 +44,13 @@ function ProductPage() {
   };
 
   // 產品列表分頁
-  const handlePageChange = (page = 1) => {
-    getProducts(page);
+  const handlePageChange = async (page = 1) => {
+    try {
+      await getProducts(page);
+    } catch (error) {
+      console.error(error);
+      setModalError(error.response?.data?.message || '取得產品列表分頁失敗');
+    }
   };
 
   // Modal表單

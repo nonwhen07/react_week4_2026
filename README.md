@@ -1,9 +1,12 @@
 # React Admin Dashboard – CRUD + Auth Flow
 
-一個使用 **React + Vite** 製作的後台商品管理系統。  
-本專案目的是模擬真實後台管理系統的登入驗證與商品管理流程，
-實作完整的 **登入驗證 + 商品 CRUD + Modal 狀態管理**，
-並練習前端專案在架構設計與責任分離上的實作方式。
+一個使用 React + Vite 製作的後台商品管理系統。
+本專案模擬真實後台管理流程，實作完整的：
+
+- Token 驗證登入
+- 商品 CRUD 管理
+- Modal 表單控制
+- 狀態與 UI 責任分離設計
 
 🔗 Live Demo  
 https://nonwhen07.github.io/react_week4_2026
@@ -12,11 +15,19 @@ https://nonwhen07.github.io/react_week4_2026
 
 ## 🎯 專案目標
 
-- 建立完整登入驗證流程（Token-based Auth）
-- 實作商品 CRUD（Create / Read / Update / Delete）
-- 管理複雜表單狀態與 Modal 控制
+### Week 3 - 登入驗證流程
+
+- 建立 Token-based Auth 流程
+- 使用 Cookie 儲存 Token
+- App 初始化驗證登入狀態
+- 驗證成功後載入商品資料
+
+### Week 4 – 商品 CRUD 與架構優化
+
+- 實作完整商品 CRUD
+- 拆分 ProductModal / DeleteModal
+- 統一資料轉換與驗證流程
 - 優化元件責任分離與資料流設計
-- 練習 GitHub Pages 自動部署流程
 
 ---
 
@@ -27,7 +38,6 @@ https://nonwhen07.github.io/react_week4_2026
 - Axios
 - Bootstrap 5
 - Sass
-- ESLint
 - gh-pages
 
 ### 📦 核心依賴說明
@@ -61,18 +71,13 @@ npm install axios bootstrap gh-pages prop-types react react-dom react-router-dom
 
 ### 1️⃣ 責任分離（Separation of Concerns）
 
-- `LoginPage`：僅負責登入與通知 Auth 狀態
-- `App`：負責驗證流程、資料抓取與狀態管理
-- Modal 操作集中於 App 層統一控制
+Auth 與資料流
 
-登入成功後：
+- LoginPage：僅負責登入
+- App：負責驗證流程與資料抓取
+- 登入成功後由 App 統一呼叫 getProducts()
 
-LoginPage → setIsAuth(true)  
-App → 根據 isAuth 觸發 getProducts()
-
-避免登入元件直接操作資料，降低耦合。
-此設計可避免未來在導入 Router 或 Context 時產生過度耦合，
-並保留架構擴充彈性。
+避免登入元件直接操作資料，保持單向資料流。
 
 ---
 
@@ -82,42 +87,75 @@ App → 根據 isAuth 觸發 getProducts()
 
 1. 將 token 寫入 cookie
 2. 設定 axios 預設 Authorization header
-3. App 初始化時：
-   - 讀取 cookie
-   - 呼叫 `/v2/api/user/check`
-   - 驗證成功後取得商品列表
+3. App 初始化時呼叫 /v2/api/user/check
 
 目前使用 Cookie 儲存 Token，
 未來可改為 HttpOnly Cookie 搭配後端驗證以提升安全性。
 
 ---
 
-### 3️⃣ Modal 狀態管理策略
+### 3️⃣ CRUD 與 Modal 架構設計（Week 4 重構重點）
 
-使用 Bootstrap 原生 JS API：
+資料流設計
 
-```js
-Modal.getOrCreateInstance(ref.current).show();
-```
+- ProductPage：集中管理
+  - products
+  - tempProduct
+  - modalMode
+  - modalError
 
-避免 React 與 Bootstrap DOM 操作衝突。
+- ProductModal：純 UI 元件
+- DeleteModal：純 UI 元件
 
-Modal 狀態透過：
+為什麼不讓 Modal 打 API？
 
-- `modalMode`（create / edit）
-- `tempProduct`（暫存編輯資料）
+- 保持 UI 與業務邏輯分離
+- 避免耦合
+- 成功後由父層統一重新抓資料
 
 ---
 
-### 4️⃣ 資料轉換處理
+### 4️⃣ 表單處理流程
 
-送出 API 前統一轉換：
+資料提交前會經過三層處理：
+1.validateProduct() → 前端驗證
+2.formatProductData() → 型別轉換
+3.API request → 後端操作
 
-字串 → Number
+範例：
 
-Boolean → 0 / 1
+```js
+const formatProductData = (product) => ({
+  ...product,
+  origin_price: Number(product.origin_price),
+  price: Number(product.price),
+  is_enabled: product.is_enabled ? 1 : 0,
+});
+```
 
-避免 API 型別錯誤。
+---
+
+### 5️⃣ Modal 動畫控制策略
+
+為避免關閉時動畫閃退：
+
+- 使用 closing 狀態保留 DOM
+- 給 Bootstrap fade-out 300ms 時間
+- 動畫結束後再卸載元件
+
+確保：
+
+- UI 平滑過渡
+- 不產生 DOM 殘留
+
+---
+
+資料提交前會經過三層處理：
+1.validateProduct() → 前端驗證
+2.formatProductData() → 型別轉換
+3.API request → 後端操作
+
+範例：
 
 ```js
 const formatProductData = (product) => ({
@@ -150,15 +188,27 @@ http://localhost:5173
 
 ```bash
 src/
- ├── main.jsx
  ├── App.jsx
- └── pages/
-      └── LoginPage.jsx
+ ├── pages/
+ │     ├── LoginPage.jsx
+ │     └── ProductPage.jsx
+ └── components/
+       ├── ProductModal.jsx
+       ├── DeleteModal.jsx
+       └── Pagination.jsx
 ```
 
 ---
 
-## 🔐 API 設計
+## 📘 API 文件來源與設計（Week 3 未補充）
+
+Swagger 文件
+
+https://hexschool.github.io/ec-courses-api-swaggerDoc/
+
+測試後台管理平台
+
+https://ec-course-api.hexschool.io/
 
 所有 API 請求透過 Axios 進行封裝，
 登入成功後統一設定 Authorization header，
@@ -257,7 +307,7 @@ dist 目錄會推送至 gh-pages 分支。
 ### 未來優化方向
 
 - 抽離 axios instance
-- 將 Modal 拆分為獨立元件
 - 導入 React Router
 - 使用 Context API 管理 Auth
+- 表單改用 useReducer
 - 升級為 TypeScript 專案
