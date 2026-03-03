@@ -37,10 +37,15 @@ function ProductPage() {
   const [modalMode, setModalMode] = useState(null);
 
   // 將try catch交給呼叫的函式處理，讓getProducts專注在抓資料，並且能在需要時重複使用
-  const getProducts = async () => {
-    const res = await axios.get(`${baseURL}/v2/api/${apiPath}/admin/products`);
+  const getProducts = async (page = 1) => {
+    const res = await axios.get(`${baseURL}/v2/api/${apiPath}/admin/products?page=${page}`);
     setProducts(res.data.products);
     setPageInfo(res.data.pagination);
+  };
+
+  // 產品列表分頁
+  const handlePageChange = (page = 1) => {
+    getProducts(page);
   };
 
   // Modal表單

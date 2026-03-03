@@ -16,21 +16,28 @@ function ProductModal({
 }) {
   // // Modal Ref 定義
   // const productModalRef = useRef(null);
-  const [shouldRender, setShouldRender] = useState(isOpen);
+  const [closing, setClosing] = useState(false);
+
+  const shouldRender = isOpen || closing;
 
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add('modal-open');
-      setShouldRender(true);
-    } else {
+      return;
+    }
+
+    // 開始關閉
+    if (!isOpen && shouldRender) {
       document.body.classList.remove('modal-open');
-      // 延遲設定 shouldRender 為 false，讓 Modal 有時間淡出
+      setClosing(true);
+
       const timer = setTimeout(() => {
-        setShouldRender(false);
-      }, 300); // Bootstrap 的淡出動畫時間約為 300ms
+        setClosing(false);
+      }, 300);
+
       return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [isOpen, shouldRender]);
 
   if (!shouldRender) return null;
 
