@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { Modal } from 'bootstrap';
+import { useEffect, useState } from 'react';
+// import { Modal } from 'bootstrap';
 import PropTypes from 'prop-types';
 
 function ProductModal({
@@ -14,41 +14,30 @@ function ProductModal({
   modalError,
   onConfirm,
 }) {
-  // Modal Ref 定義
-  const productModalRef = useRef(null);
+  // // Modal Ref 定義
+  // const productModalRef = useRef(null);
+  const [shouldRender, setShouldRender] = useState(isOpen);
 
-  //初始化 Modal
   useEffect(() => {
-    if (productModalRef.current) {
-      new Modal(productModalRef.current, { backdrop: false });
-    }
-  }, []);
-
-  // 根據 isOpen 控制 Modal 的顯示與隱藏
-  useEffect(() => {
-    if (!productModalRef.current) return;
-
-    const modal = Modal.getOrCreateInstance(productModalRef.current);
-
     if (isOpen) {
-      modal.show();
+      document.body.classList.add('modal-open');
+      setShouldRender(true);
     } else {
-      modal.hide();
+      document.body.classList.remove('modal-open');
+      // 延遲設定 shouldRender 為 false，讓 Modal 有時間淡出
+      const timer = setTimeout(() => {
+        setShouldRender(false);
+      }, 300); // Bootstrap 的淡出動畫時間約為 300ms
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
-  // 專門處理「取消按鈕」
-  const handleClose = () => {
-    const modal = Modal.getOrCreateInstance(productModalRef.current);
-    modal.hide();
-    onClose(); // 通知父層
-  };
+  if (!shouldRender) return null;
 
   return (
     <div
       id="productModal"
-      ref={productModalRef}
-      className="modal fade"
+      className={`modal fade ${isOpen ? 'show d-block' : ''}`}
       style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
     >
       <div className="modal-dialog modal-dialog-centered modal-xl">
@@ -59,7 +48,7 @@ function ProductModal({
             </h5>
             <button
               type="button"
-              onClick={handleClose}
+              onClick={onClose}
               className="btn-close"
               aria-label="Close"
             ></button>
@@ -264,5 +253,39 @@ function ProductModal({
     </div>
   );
 }
+
+// === 新增 `propTypes` 驗證 ===
+ProductModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  modalMode: PropTypes.oneOf(['create', 'edit']).isRequired,
+
+  tempProduct: PropTypes.shape({
+    // 確保 `tempProduct` 是物件，且內部特定屬性為必填
+    imageUrl: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    category: PropTypes.string.isRequired,
+    unit: PropTypes.string.isRequired,
+    origin_price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    is_enabled: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
+    description: PropTypes.string.isRequired,
+    content: PropTypes.string.isRequired,
+    imagesUrl: PropTypes.arrayOf(PropTypes.string),
+  }).isRequired,
+
+  onModalChange: PropTypes.func.isRequired,
+  onImageChange: PropTypes.func.isRequired,
+  addImage: PropTypes.func.isRequired,
+  deleteImage: PropTypes.func.isRequired,
+  modalError: PropTypes.string,
+  onConfirm: PropTypes.func.isRequired,
+};
+
+ProductModal.defaultProps = {
+  tempProduct: {
+    is_enabled: 0, // 確保未設定時預設為 0（未啟用）
+  },
+};
 
 export default ProductModal;
