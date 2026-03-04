@@ -6,6 +6,7 @@ import axios from 'axios';
 import Pagination from '../components/Pagination';
 import ProductModal from '../components/ProductModal';
 import DeleteModal from '../components/DeleteModal';
+import StarRating from '../components/StarRating';
 
 function ProductPage() {
   // 環境變數
@@ -32,6 +33,7 @@ function ProductPage() {
     content: '',
     is_enabled: 0,
     imagesUrl: [''],
+    rating: 0, // ⭐新增
   };
   const [tempProduct, setTempProduct] = useState(defaultModalState);
   const [modalMode, setModalMode] = useState(null);
@@ -58,7 +60,7 @@ function ProductPage() {
     const { name, value, checked, type } = e.target;
     setTempProduct((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value, //透過type判斷是否為checkbox，綁定 checkbox 的勾選狀態時，應透過 checked 屬性，而非 value
+      [name]: type === 'checkbox' ? checked : name === 'rating' ? Number(value) : value,
     }));
   };
   const handleImageChange = (e, index) => {
@@ -135,7 +137,7 @@ function ProductPage() {
       } else {
         await updateProduct();
       }
-      await getProducts();
+      await getProducts(pageInfo.current_page || 1);
       setIsProdModalOpen(false); // 成功才關閉 Modal
     } catch (error) {
       console.error(error);
@@ -150,7 +152,7 @@ function ProductPage() {
   const handleDeleteProduct = async () => {
     try {
       await deleteProduct();
-      await getProducts();
+      await getProducts(pageInfo.current_page || 1);
       setIsDeleModalOpen(false);
     } catch (error) {
       console.error(error);
@@ -191,7 +193,7 @@ function ProductPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        await getProducts();
+        await getProducts(pageInfo.current_page || 1);
       } catch (error) {
         console.error(error);
       }
@@ -217,9 +219,10 @@ function ProductPage() {
           <thead>
             <tr>
               <th width="120">分類</th>
-              <th width="500">產品名稱</th>
+              <th width="300">產品名稱</th>
               <th width="120">原價</th>
               <th width="120">售價</th>
+              <th width="120">商品評價</th>
               <th width="100">是否啟用</th>
               <th width="120"></th>
             </tr>
@@ -231,6 +234,9 @@ function ProductPage() {
                 <td>{product.title}</td>
                 <td>{product.origin_price}</td>
                 <td>{product.price}</td>
+                {/* <td>{renderStars(product.rating)}</td> */}
+                <td>{<StarRating rating={product.rating} />}</td>
+
                 <td>
                   {product.is_enabled ? (
                     <span className="text-success">啟用</span>

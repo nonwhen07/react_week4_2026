@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Modal } from 'bootstrap';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 
 function DeleteModal({ isOpen, onClose, onConfirm, productTitle }) {
   // Modal Ref 定義

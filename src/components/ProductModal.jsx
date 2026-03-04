@@ -141,6 +141,21 @@ function ProductModal({
                     placeholder="請輸入標題"
                   />
                 </div>
+                <div className="mb-3">
+                  <label className="form-label">商品評價</label>
+                  <select
+                    className="form-select"
+                    value={tempProduct.rating}
+                    onChange={onModalChange}
+                    name="rating"
+                  >
+                    <option value="1">⭐</option>
+                    <option value="2">⭐⭐</option>
+                    <option value="3">⭐⭐⭐</option>
+                    <option value="4">⭐⭐⭐⭐</option>
+                    <option value="5">⭐⭐⭐⭐⭐</option>
+                  </select>
+                </div>
 
                 <div className="mb-3">
                   <label htmlFor="category" className="form-label">
@@ -275,6 +290,7 @@ ProductModal.propTypes = {
     // 確保 `tempProduct` 是物件，且內部特定屬性為必填
     imageUrl: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
+    rating: PropTypes.number.isRequired,
     category: PropTypes.string.isRequired,
     unit: PropTypes.string.isRequired,
     origin_price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
