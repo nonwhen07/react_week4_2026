@@ -37,6 +37,7 @@ https://nonwhen07.github.io/react_week4_2026
 - Vite 7
 - Axios
 - Bootstrap 5
+- React-icons
 - Sass
 - gh-pages
 
@@ -60,7 +61,7 @@ npm install
 <summary>📌 手動安裝依賴（快速小抄）</summary>
 
 ```bash
-npm install axios bootstrap gh-pages prop-types react react-dom react-router-dom sass
+npm install axios bootstrap react-icons gh-pages prop-types react react-dom react-router-dom sass
 ```
 
 </details>

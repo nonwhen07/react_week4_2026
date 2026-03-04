@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 // import { Modal } from 'bootstrap';
 import PropTypes from 'prop-types';
+import { FaStar } from 'react-icons/fa';
 
 function ProductModal({
   isOpen,
@@ -21,6 +22,8 @@ function ProductModal({
   const [closing, setClosing] = useState(false);
   // 只要正在開啟（isOpen）或正在關閉動畫（closing），就保留 DOM
   const shouldRender = isOpen || closing;
+
+  const [hoverRating, setHoverRating] = useState(0);
 
   useEffect(() => {
     if (isOpen) {
@@ -141,7 +144,7 @@ function ProductModal({
                     placeholder="請輸入標題"
                   />
                 </div>
-                <div className="mb-3">
+                {/* <div className="mb-3">
                   <label className="form-label">商品評價</label>
                   <select
                     className="form-select"
@@ -155,6 +158,42 @@ function ProductModal({
                     <option value="4">⭐⭐⭐⭐</option>
                     <option value="5">⭐⭐⭐⭐⭐</option>
                   </select>
+                </div> */}
+                <div className="mb-3">
+                  <label className="form-label">商品評價</label>
+                  <div style={{ fontSize: '24px', cursor: 'pointer' }}>
+                    {Array.from({ length: 5 }, (_, i) => {
+                      const ratingValue = i + 1;
+
+                      return (
+                        <FaStar
+                          className="me-1"
+                          key={i}
+                          size={24}
+                          style={{
+                            color:
+                              ratingValue <= (hoverRating || tempProduct.rating)
+                                ? '#ffc107'
+                                : '#e4e5e9',
+                            transition: 'color 0.2s',
+                          }}
+                          onMouseEnter={() => setHoverRating(ratingValue)}
+                          onMouseLeave={() => setHoverRating(0)}
+                          onClick={() =>
+                            onModalChange({
+                              target: {
+                                name: 'rating',
+                                value: ratingValue,
+                                type: 'number',
+                              },
+                            })
+                          }
+                        />
+                      );
+                    })}
+                  </div>
+
+                  <small className="text-muted">已選擇 {tempProduct.rating || 0} 顆星</small>
                 </div>
 
                 <div className="mb-3">
