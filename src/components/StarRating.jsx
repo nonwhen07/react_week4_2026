@@ -2,10 +2,11 @@ import PropTypes from 'prop-types';
 import { FaStar } from 'react-icons/fa';
 
 function StarRating({ rating = 0 }) {
+  const safeRating = Math.max(0, Math.min(5, rating));
   return (
-    <div className="d-flex justify-content-start">
+    <div className="d-flex">
       {[...Array(5)].map((_, i) => (
-        <FaStar className="me-1" key={i} size={18} color={i < rating ? '#ffc107' : '#e4e5e9'} />
+        <FaStar key={i} size={18} className="me-1" color={i < safeRating ? '#ffc107' : '#e4e5e9'} />
       ))}
     </div>
   );
@@ -13,7 +14,7 @@ function StarRating({ rating = 0 }) {
 
 // === 新增 `propTypes` 驗證 ===
 StarRating.propTypes = {
-  rating: PropTypes.number.isRequired, // 確保 `rating` 是數字
+  rating: PropTypes.number,
 };
 
 export default StarRating;
